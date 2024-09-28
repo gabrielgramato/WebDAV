@@ -25,7 +25,7 @@ https://nodejs.org/en/download/prebuilt-installer
 
 # Download WebDAV:
 cd C:\
-git clone https://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@github.com/gabrielgramato/WebDAV.git
+git clone https://github.com/gabrielgramato/WebDAV.git
 cd WebDAV\
 pip install bcrypt cryptography wsgidav
 python app.py
