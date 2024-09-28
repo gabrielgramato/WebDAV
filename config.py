@@ -12,7 +12,7 @@ config = {
     "host": "0.0.0.0",  # Servidor disponível em qualquer IP
     "port": 3222,  # Porta de acesso
     "provider_mapping": {
-        "/": r"C:\NAS",  # Mapeia o caminho do sistema de arquivos
+        "/": r"N:\\",  # Mapeia o caminho do sistema de arquivos
     },
     "simple_dc": {
         "user_mapping": {
