@@ -1,7 +1,23 @@
 import os
 import ssl
 import subprocess
+import json
 from wsgiref.simple_server import make_server
+
+# Função para carregar usuários do arquivo
+def load_users():
+    users_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "accounts", "users.json")
+    if os.path.isfile(users_file):
+        with open(users_file, 'r') as f:
+            return json.load(f)
+    return {}
+
+# Verifica se há usuários existentes
+users = load_users()
+if not users:
+    print("Nenhum usuário encontrado. Execute o hash.py para criar um usuário.")
+    subprocess.run(['python', 'hash.py'], check=True)
+    users = load_users()  # Tenta carregar os usuários novamente após a criação
 
 # Verifica se o certificado SSL existe
 certs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "certs")
@@ -30,6 +46,7 @@ def simple_app(environ, start_response):
                 content = f.read()
             status = '200 OK'
             headers = [('Content-Type', 'text/html'), ('Content-Length', str(len(content)))]
+
             start_response(status, headers)
             return [content]
         except FileNotFoundError:
