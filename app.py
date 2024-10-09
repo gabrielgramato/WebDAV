@@ -1,66 +1,36 @@
 import os
-import ssl
-import subprocess
-import json
+import sys
+
+# Verifica se o arquivo 'config.py' existe antes de tentar importar
+config_path = "config.py"
+if not os.path.isfile(config_path):
+    print(f"Arquivo '{config_path}' não encontrado. Executando hash.py para gerar uma nova chave e usuário.")
+    os.system('python hash.py')  # Executa hash.py para gerar a chave e o usuário
+    sys.exit(0)  # Sai do programa após executar o hash.py
+
+# Tente importar a configuração
+try:
+    from config import config  # Importando a configuração do arquivo config.py
+except Exception as e:
+    print(f"Erro ao importar o arquivo 'config.py': {e}")
+    sys.exit(1)
+
+# Verifica se o arquivo 'secret.key' existe
+secret_key_file = os.path.join("accounts", "secret.key")
+if not os.path.isfile(secret_key_file):
+    print("Arquivo 'secret.key' não encontrado. Executando hash.py para gerar uma nova chave e usuário.")
+    os.system('python hash.py')  # Executa hash.py para gerar a chave e o usuário
+    sys.exit(0)  # Sai do programa após executar o hash.py
+
+# Continue com a inicialização do WsgiDAV
+from wsgidav.wsgidav_app import WsgiDAVApp
 from wsgiref.simple_server import make_server
+from middleware import custom_middleware  # Importando o middleware
 
-# Função para carregar usuários do arquivo
-def load_users():
-    users_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "accounts", "users.json")
-    if os.path.isfile(users_file):
-        with open(users_file, 'r') as f:
-            return json.load(f)
-    return {}
+app = WsgiDAVApp(config)
+app = custom_middleware(app)  # Integrando o middleware
 
-# Verifica se há usuários existentes
-users = load_users()
-if not users:
-    print("Nenhum usuário encontrado. Execute o hash.py para criar um usuário.")
-    subprocess.run(['python', 'hash.py'], check=True)
-    users = load_users()  # Tenta carregar os usuários novamente após a criação
-
-# Verifica se o certificado SSL existe
-certs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "certs")
-cert_file = os.path.join(certs_dir, "cert.pem")
-key_file = os.path.join(certs_dir, "key.pem")
-
-if not os.path.exists(cert_file) or not os.path.exists(key_file):
-    print("Certificado SSL não encontrado. Gerando certificado SSL...")
-    subprocess.run(['python', 'cert.py'], check=True)
-
-# Configuração SSL usando SSLContext
-context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-context.load_cert_chain(certfile=cert_file, keyfile=key_file)
-
-# Caminho do arquivo index.html
-html_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "index.html")
-
-# Função WSGI para servir o arquivo index.html
-def simple_app(environ, start_response):
-    path = environ.get('PATH_INFO', '')
-    
-    # Serve o arquivo index.html apenas na raiz
-    if path == '/' or path == '/index.html':
-        try:
-            with open(html_file, "rb") as f:
-                content = f.read()
-            status = '200 OK'
-            headers = [('Content-Type', 'text/html'), ('Content-Length', str(len(content)))]
-
-            start_response(status, headers)
-            return [content]
-        except FileNotFoundError:
-            status = '404 Not Found'
-            start_response(status, [('Content-Type', 'text/plain')])
-            return [b'File not found']
-    else:
-        # Responde com 404 para qualquer outro caminho
-        status = '404 Not Found'
-        start_response(status, [('Content-Type', 'text/plain')])
-        return [b'Page not found']
-
-# Configurando o servidor com HTTPS
-with make_server('', 3222, simple_app) as httpd:
-    httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
-    print("Servindo WebDAV em https://0.0.0.0:3222")
-    httpd.serve_forever()
+if __name__ == "__main__":
+    print(f"Servindo WebDAV em http://{config['host']}:{config['port']}")
+    with make_server(config["host"], config["port"], app) as httpd:
+        httpd.serve_forever()
