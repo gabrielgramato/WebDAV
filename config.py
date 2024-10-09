@@ -15,11 +15,6 @@ else:
     print("Arquivo 'users.json' não encontrado. Execute o hash.py para criar um usuário.")
     users = {}  # Define um dicionário vazio caso o arquivo não exista
 
-# Verifica se há usuários definidos
-if not users:
-    print("Nenhum usuário encontrado. Execute o hash.py para criar um usuário.")
-    # Opcional: aqui você pode decidir como lidar com a ausência de usuários
-
 # Carrega a configuração do arquivo
 config = {
     "host": "0.0.0.0",  # Servidor disponível em qualquer IP
@@ -30,8 +25,8 @@ config = {
     "simple_dc": {
         "user_mapping": {
             "/": {  # Mapeamento de usuários para o caminho "/"
-                # Não usa mais um usuário padrão
-                **users  # Inclui todos os usuários definidos no arquivo
+                # Aqui podemos usar o conteúdo do 'users.json' quando ele existir
+                "admin": users.get("admin", {"password": "mari.2401"}),  # Credenciais padrão caso não haja usuários
             },
         },
         "realm": "Link Informática",  # Definindo um realm
