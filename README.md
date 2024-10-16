@@ -247,11 +247,3 @@ ignoreself = false
    ```
 
 With this setup, Fail2Ban will automatically block IP addresses that exceed the allowed number of failed login attempts.
-
-## Contributing
-
-Feel free to open an issue or a pull request.
-
-## License
-
-[MIT License](LICENSE) © [Henrique Dias](https://hacdias.com)
