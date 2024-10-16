@@ -4,6 +4,10 @@ directory: N:/
 tls: true
 cert: C:/WebDav/certs/cert.pem
 key: C:/WebDav/certs/key.pem
+
 users:
   - username: admin
     password: mari.2401
+    permissions: CRUD  # Permissões para o usuário admin
+
+permissions: CRUD  # Permissões padrão para todos os usuários
