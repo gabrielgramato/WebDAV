@@ -1,0 +1,9 @@
+address: 0.0.0.0
+port: 3222
+directory: C:/
+tls: true
+cert: C:/webdav/certs/cert.pem
+key: C:/webdav/certs/key.pem
+users:
+  - username: admin
+    password: mari.2401

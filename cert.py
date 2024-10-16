@@ -4,8 +4,7 @@ from cryptography.x509.oid import NameOID
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives.serialization import BestAvailableEncryption
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # Caminho da pasta para salvar os certificados
 certs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "certs")
@@ -26,11 +25,11 @@ def generate_ssl_cert():
 
     # Detalhes do certificado
     subject = issuer = x509.Name([
-        x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
-        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "California"),
-        x509.NameAttribute(NameOID.LOCALITY_NAME, "San Francisco"),
-        x509.NameAttribute(NameOID.ORGANIZATION_NAME, "My Company"),
-        x509.NameAttribute(NameOID.COMMON_NAME, "localhost"),
+        x509.NameAttribute(NameOID.COUNTRY_NAME, "BR"),
+        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "SP"),
+        x509.NameAttribute(NameOID.LOCALITY_NAME, "Santa Isabel"),
+        x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Link Informática LTDA"),
+        x509.NameAttribute(NameOID.COMMON_NAME, "187.103.57.132"),  # IP do servidor
     ])
 
     # Gerando o certificado autoassinado
@@ -40,8 +39,8 @@ def generate_ssl_cert():
         .issuer_name(issuer)
         .public_key(key.public_key())
         .serial_number(x509.random_serial_number())
-        .not_valid_before(datetime.utcnow())
-        .not_valid_after(datetime.utcnow() + timedelta(days=365))  # Certificado válido por 1 ano
+        .not_valid_before(datetime.now(timezone.utc))  # Usando UTC
+        .not_valid_after(datetime.now(timezone.utc) + timedelta(days=365))  # Certificado válido por 1 ano
         .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
         .sign(key, hashes.SHA256(), default_backend())
     )
